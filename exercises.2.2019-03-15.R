@@ -186,3 +186,287 @@ s1
 # Note: The sign and value of beta1 flipped between the 1st and 3rd model. 
 # This shows that the interpretation of each beta_k depends on 
 #   the other variables in the model! 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############################################################################################################
+# Problem 2
+############################################################################################################
+# 2. In this exercise, we will code a categorical variable by hand. 
+# The dataset Carseats contains the number of child car seat sales and several predictors in 
+# 400 locations. We will only use the quantitative predictor advertising (local advertising budget 
+# for company at each location in thousands of dollars) and the qualitative predictor shelveloc (a factor
+# with levels ‘Bad’, ‘Good’ and ‘Medium’ indicating the quality of the shelving location for the car seats 
+# at each site). Consider the following R code:
+install.packages('ISLR') 
+
+# prepare data
+library(ISLR)
+data(Carseats) #use ?Carseats for an explaination of the dataset
+?Carseats 
+
+shelveloc=Carseats$ShelveLoc
+# A factor with levels Bad, Good and Medium indicating the quality of the shelving location 
+# for the car seats at each site
+
+sales=Carseats$Sales
+# Unit sales (in thousands) at each location
+
+advertising=Carseats$Advertising
+# Local advertising budget for company at each location (in thousands of dollars)
+
+# fit using automatic coding
+fit<-lm(sales~shelveloc+advertising)
+(s <- summary(fit))
+
+
+# plot results:
+coeff <- coefficients(fit)
+plot(advertising, sales, col=shelveloc, pch=20)
+legend("topleft", c("bad", "medium", "good"), col=c(1,3,2), pch=20)
+abline(a=coeff[1], b=coeff[4], col=1, lwd=2)
+abline(a=coeff[1]+coeff[3], b=coeff[4], col=3, lwd=2)
+abline(a=coeff[1]+coeff[2], b=coeff[4], col=2, lwd=2)
+
+
+
+# a) Encode the factor variable shelveloc in the same way as done automatically by R by constructing 
+# appropriate predictors a1 and a2. a1 shall be 1 when the level of shelveloc is medium and a2 shall be 1 
+# if its level is good. The so-called contrast coding in this case can be seen in Table 1. Fit the model 
+# fit_a<-lm(sales~a1+a2+advertising). Verify that fit and fit_a are indeed equal and give an interpretation
+# of the coefficients corresponding to a1 and a2.
+
+# boolean vectors for easy construction of a1, a2
+bad <- levels(shelveloc)[1]==shelveloc
+medium <- levels(shelveloc)[3]==shelveloc
+good <- levels(shelveloc)[2]==shelveloc
+a1 <- medium*1
+a2 <- good*1
+
+fit_a<-lm(sales~a1+a2+advertising)
+summary(fit_a)
+
+
+
+# slopes of the model are the same, but the intercepts are different according to a1 and a2. 
+# a1 corresponds to the intercept for shelvelocMedium added to the baseline intercept (4.89662) of the 
+# shelvelocBad data. a2 corresponds to the intercept for shelvelocGood added to the baseline intercept of the 
+# shelvelocBad data.
+
+
+
+
+# b) Construct predictor variables b1 and b2 according to the contrast coding in Table 1 and fit the 
+# model fit_b<-lm(sales~b1+b2+advertising). Give an interpretation of the coefficients of b1 and b2.
+# boolean vectors for easy construction of b1, b2
+bad <- levels(shelveloc)[1]==shelveloc
+medium <- levels(shelveloc)[3]==shelveloc
+good <- levels(shelveloc)[2]==shelveloc
+b1 <- bad*1
+b2 <- good*1
+
+fit_b<-lm(sales~b1+b2+advertising)
+summary(fit_b)
+
+# slopes of the model are the same, but the intercepts are different according to b1 and b2. 
+# b1 corresponds to the intercept for shelvelocBad added (subtracted because it is negative) 
+# to the baseline intercept (6.64805) of the shelvelocMedium data. b2 corresponds to the intercept 
+# for shelvelocGood added to the baseline intercept of the shelvelocMedium data.
+
+
+# c) Construct predictor variables c1, c2 and c3 according to Table 1.
+# Then fit the model fit_c<-lm(sales~c1+c2+c3+advertising). This causes a problem. Why?
+
+bad <- levels(shelveloc)[1]==shelveloc
+medium <- levels(shelveloc)[3]==shelveloc
+good <- levels(shelveloc)[2]==shelveloc
+c1 <- bad*1
+c2 <- medium*1
+c3 <- good*1
+
+fit_c<-lm(sales~c1+c2+c3+advertising)
+summary(fit_c)
+
+# The problem is the dummy encoding, write equations...
+
+
+
+
+# d) Remove the intercept by using fit_c<-lm(-1+...). Interpret the coefficients corresponding 
+# to c1, c2 and c3.
+
+fit_c<-lm(sales~-1+c1+c2+c3+advertising)
+summary(fit_c)
+
+#  write equations... quite clear then
+
+
+
+
+# e) Show that the fitted values are the same for fit_a, fit_b and fit_c.
+# Note: Due to rounding errors the values are not exactly the same. Show that they are very close. 
+# R-hint: max(abs(fitted(fit_a)-fitted(fit_b)))
+
+max(abs(fitted(fit_a)-fitted(fit_b)))
+max(abs(fitted(fit_b)-fitted(fit_c)))
+max(abs(fitted(fit_a)-fitted(fit_c)))
+
+
+
+
+
+# f) We now want to know if distinguishing between all three categories is significantly better than 
+# distinguishing only between “bad” (level bad) and “not bad” (level medium or good) each time also 
+# accounting for advertising. In which of the summaries of the fits fit_a, fit_b, fit_c can we see this 
+# directly? Explain.
+summary(fit)
+summary(fit_a)
+summary(fit_b)
+summary(fit_c)
+
+# We can see this directly in fit_c. Check the equations
+
+# Question: Why are the R2 different between fit and fit_a and fit_b versus fit_c???
+
+
+# g) Suppose we used the coding from fit_a. Conduct a partial F-test to check if we need to distinguish 
+# between medium and good by fitting a model fit_d with a new dummy variable.
+
+bad <- levels(shelveloc)[1]==shelveloc
+medium <- levels(shelveloc)[3]==shelveloc
+good <- levels(shelveloc)[2]==shelveloc
+a1 <- medium*1
+a2 <- good*1
+
+# large model: distinguishes between medium and good
+fit_a<-lm(sales~a1+a2+advertising)
+
+# small model: does not distinguish between medium and good
+d1 <- bad*1
+d2 <- bad*0   # not bad --> medium or good
+fit_d <- lm(sales~d1+d2+advertising)
+
+# and conducting a partial F-test:
+(fit.anova <- anova(fit_d, fit_a) )
+
+
+# this significant very small p-value means that we can reject the hypothesis of the smaller model, so we
+# need to distinguish between the medium and good as done in model fit_a.
+
+
+
+
+
+
+
+
+
+
+
+
+############################################################################################################
+# Problem 3
+############################################################################################################
+# 3. The dataset airline contains the monthly number of flight passengers in the USA in the years 1949-1960 
+# ranging from January 1949 to December 1960. Read the data with the command: 
+
+airline <- scan("http://stat.ethz.ch/Teaching/Datasets/airline.dat")
+
+
+
+# a) Plot the data against time and describe what you observe.
+plot(airline, xlab="Index Jan 1949-Dec1960", ylab="Monthly number of flight passengers")
+
+# The monthly number of flight passengers in the USA increases from Jan 1949 to Dec 1960. At the same time
+# the spread between one timestamp and the next increases, meaning that for larger x values the spread in
+# the y values increases.
+
+
+
+# b) Compute the logarithm of the data and plot against time. Comment on the difference.
+log.airline <- log(airline)
+plot(log.airline , xlab="Index Jan 1949-Dec1960", ylab="Monthly number of flight passengers (log)")
+
+# The monthly number of flight passengers in the USA increases from Jan 1949 to Dec 1960. However in this
+# representation the spread in y is not increasing with increasing x.
+
+
+
+
+# c) Define a linear model of the form ...
+
+x1<-rep(c(1,rep(0,11)),12) 
+x2<-rep(c(0,1,rep(0,10)),12) 
+x3<-rep(c(0,0,1,rep(0,9)),12) 
+x4<-rep(c(0,0,0,1,rep(0,8)),12) 
+x5<-rep(c(0,0,0,0,1,rep(0,7)),12) 
+x6<-rep(c(0,0,0,0,0,1,rep(0,6)),12) 
+x7<-rep(c(rep(0,6),1,rep(0,5)),12) 
+x8<-rep(c(rep(0,7),1,rep(0,4)),12) 
+x9<-rep(c(rep(0,8),1,rep(0,3)),12) 
+x10<-rep(c(rep(0,9),1,rep(0,2)),12) 
+x11<-rep(c(rep(0,10),1,0),12) 
+x12<-rep(c(rep(0,11),1),12) 
+t<-1:144
+fit <- lm(log.airline~-1+t+x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12)
+(s <- summary(fit))
+
+
+# d) Plot the fitted values and residuals against time. Do you think that the model assumptions hold?
+
+# fitted values
+yhat <- fitted.values(fit)
+# residuals
+et <-residuals(fit)
+plot(log.airline , xlab="Index Jan 1949-Dec1960", ylab="Monthly number of flight passengers (log)")
+lines(t, yhat, col=c(2))
+legend("topleft", c("data", "fitted values"), col=c(1,2), pch=20)
+
+plot(t, et, main="Residuals vs time")
+
+# I do not think that the model assumptions hold. For low and high values of t the residuals are small 
+# (negative) and for medium values of t the residuals are large. This means that E(eps) is not 0.
+
+
+
+
+# e) Give an interpretation of the parameter beta in the above model if we consider the original scale.
+# see notes
+
+# Conduct a partial F-test to check whether we can use four predictors indicating the seasons 
+# s1 , · · · , s4 (s1 for spring (month 3,4,5),. . . , s4 for winter (month 12,1,2)) instead of 
+#twelve indicators x1, · · · , x12 encoding the month.
+s1 <- rep(c(rep(0,2),rep(1,3),rep(0,7)),12) # spring
+s2 <- rep(c(rep(0,5),rep(1,3),rep(0,4)),12) # summer
+s3 <- rep(c(rep(0,8),rep(1,3),0),12) # herbst
+s4 <- rep(c(1,1,rep(0,9),1),12) # summer
+fit.seasons <- lm(log.airline~-1+t+s1+s2+s3+s4)
+(s.seasons <- summary(fit.seasons))
+# fitted values
+yhat <- fitted.values(fit.seasons)
+# residuals
+et <-residuals(fit.seasons)
+plot(log.airline , xlab="Index Jan 1949-Dec1960", ylab="Monthly number of flight passengers (log)")
+lines(t, yhat, col=c(4))
+
+plot(t, et, main="Residuals vs time")
+# and conducting a partial F-test:
+(fit.anova <- anova(fit.seasons, fit) )
+
+
+# the partial F test has a very low p value indicating that we cannot use the four predictors of the seasons 
+# but should stick with the 12 indicators encoding each month.
