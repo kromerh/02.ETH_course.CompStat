@@ -31,14 +31,14 @@ num_females <-  unique(data$partners)
 type_females <- unique(data$type)
 
 my_colors <- c("red", "blue", "green")
-data$my_color[data$partners==num_females[1]]="red"
-data$my_color[data$partners==num_females[2]]="blue"
-data$my_color[data$partners==num_females[3]]="green"
+data$my_color[data$partners==num_females[1]]=my_colors[1]
+data$my_color[data$partners==num_females[2]]=my_colors[2]
+data$my_color[data$partners==num_females[3]]=my_colors[3]
 
-my_markers <- c(15,16,17)
-data$my_symbol[data$type==type_females[1]]=15
-data$my_symbol[data$type==type_females[2]]=16
-data$my_symbol[data$type==type_females[3]]=17
+my_markers <- c(0,1,2)
+data$my_symbol[data$type==type_females[1]]=my_markers[1]
+data$my_symbol[data$type==type_females[2]]=my_markers[2]
+data$my_symbol[data$type==type_females[3]]=my_markers[3]
 
 plot(data$thorax, data$longevity, col=data$my_color, pch=data$my_symbol, 
      ylim = c(0,110),
@@ -53,3 +53,43 @@ legend("topleft",
        legend=c(type_females[1], type_females[2], type_females[3]), 
        pch=c(my_markers[1], my_markers[2], my_markers[3]))
 
+
+
+
+## c) Make three separate plots of longevity versus thorax, one for the flies with 0 females, 
+# one for the flies with 1 female and one for the flies with 8 females. Use the same plotting colors 
+# and symbols as above. Comment on the plot. Do you see evidence for an interaction between the number 
+# of females and type of females in their effect on longevity?
+
+data.females0 <- data[data$partners==0,]
+data.females0
+plot(data.females0$thorax, data.females0$longevity, col=data.females0$my_color, pch=data.females0$my_symbol, 
+     ylim = c(0,110),
+     xlab="thorax", ylab="longevity",
+     main="flies with 0 females")
+legend("topleft",
+       title="type of female", 
+       legend=c(type_females[1], type_females[2], type_females[3]), 
+       pch=c(my_markers[1], my_markers[2], my_markers[3]))
+
+data.females1 <- data[data$partners==1,]
+data.females1
+plot(data.females1$thorax, data.females1$longevity, col=data.females1$my_color, pch=data.females1$my_symbol, 
+     ylim = c(0,110),
+     xlab="thorax", ylab="longevity",
+     main="flies with 1 female")
+legend("topleft",
+       title="type of female", 
+       legend=c(type_females[1], type_females[2], type_females[3]), 
+       pch=c(my_markers[1], my_markers[2], my_markers[3]))
+
+data.females8 <- data[data$partners==8,]
+data.females8
+plot(data.females8$thorax, data.females8$longevity, col=data.females8$my_color, pch=data.females8$my_symbol, 
+     ylim = c(0,110),
+     xlab="thorax", ylab="longevity",
+     main="flies with 8 females")
+legend("topleft",
+       title="type of female", 
+       legend=c(type_females[1], type_females[2], type_females[3]), 
+       pch=c(my_markers[1], my_markers[2], my_markers[3]))
