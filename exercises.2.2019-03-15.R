@@ -447,7 +447,7 @@ plot(t, et, main="Residuals vs time")
 # e) Give an interpretation of the parameter beta in the above model if we consider the original scale.
 # see notes
 
-# Conduct a partial F-test to check whether we can use four predictors indicating the seasons 
+# f) Conduct a partial F-test to check whether we can use four predictors indicating the seasons 
 # s1 , · · · , s4 (s1 for spring (month 3,4,5),. . . , s4 for winter (month 12,1,2)) instead of 
 #twelve indicators x1, · · · , x12 encoding the month.
 s1 <- rep(c(rep(0,2),rep(1,3),rep(0,7)),12) # spring
